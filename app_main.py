@@ -1,52 +1,72 @@
-# FILE: app.py
 import streamlit as st
 import yaml
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 import inspect
-st.write("Authenticate.login signature:", inspect.signature(stauth.Authenticate.login))
 
+# -------------------------------------------------
+# Streamlit page setup
+# -------------------------------------------------
+st.set_page_config(page_title="Deployment and Login Test - Stable Version", layout="centered")
 
-st.set_page_config(page_title="Login Test", page_icon="✅", layout="centered")
 st.title("Deployment and Login Test - Stable Version")
 
-# Display version info
+# -------------------------------------------------
+# Load credentials from config.yaml
+# -------------------------------------------------
 try:
-    version = getattr(stauth, "__version__", "Unknown")
-    st.info(f"streamlit-authenticator version: {version}")
-except Exception:
-    st.info("streamlit-authenticator version: Unknown")
-
-try:
-    # Load config.yaml
-    with open('config.yaml', 'r') as file:
+    with open('config.yaml') as file:
         config = yaml.load(file, Loader=SafeLoader)
+except FileNotFoundError:
+    st.error("Missing config.yaml file in current directory.")
+    st.stop()
 
-    # Initialize authenticator (for 0.4.2+)
+# -------------------------------------------------
+# Initialize authenticator
+# -------------------------------------------------
+try:
     authenticator = stauth.Authenticate(
         config['credentials'],
         config['cookie']['name'],
         config['cookie']['key'],
-        config['cookie']['expiry_days']
+        config['cookie']['expiry_days'],
+        config.get('preauthorized', None)
     )
+except Exception as e:
+    st.error(f"Error initializing authenticator: {e}")
+    st.stop()
 
-    # For 0.4.2 use new login structure
-    try:
-        name, authentication_status, username = authenticator.login('Login', location='main')
-    except TypeError:
-        # fallback for older call signature
-        name, authentication_status, username = authenticator.login('Login')
+# -------------------------------------------------
+# Display version info
+# -------------------------------------------------
+try:
+    st.info(f"streamlit-authenticator version: {stauth.__version__}")
+except Exception:
+    st.info("streamlit-authenticator version: Unknown")
 
-    # Auth logic
-    if authentication_status:
-        st.success(f"Welcome, {name}!")
-        authenticator.logout('Logout', location='sidebar')
-    elif authentication_status is False:
-        st.error("Username or password is incorrect.")
-    elif authentication_status is None:
+# -------------------------------------------------
+# Login section
+# -------------------------------------------------
+try:
+    # Correct for streamlit-authenticator >= 0.4.0
+    name, auth_status, username = authenticator.login(location='main')
+
+    if auth_status:
+        st.success(f"Welcome {name}")
+        st.write("Login successful. You can now view your reports below.")
+        authenticator.logout('Logout', 'sidebar')
+
+    elif auth_status is False:
+        st.error("Invalid username or password.")
+
+    elif auth_status is None:
         st.warning("Please enter your username and password.")
 
-except FileNotFoundError:
-    st.error("The file 'config.yaml' was not found in your repository.")
 except Exception as e:
     st.error(f"Unexpected error: {e}")
+
+# -------------------------------------------------
+# Footer
+# -------------
+st.markdown("<hr>", unsafe_allow_html=True)
+st.caption("Sita Air | Internal Test Build | Stable Login System")
