@@ -10,14 +10,14 @@ except ModuleNotFoundError:
     st.stop()
 
 st.set_page_config(page_title="Flight Report Login", page_icon="✈️", layout="centered")
-st.title("Deployment and Login Test - Stable Version")
+st.title("Deployment and Login Test - Compatible Version")
 
-# Display authenticator version if available
+# Check authenticator version
 auth_version = getattr(stauth, "__version__", "Unknown")
 st.info(f"streamlit-authenticator version: {auth_version}")
 
 try:
-    # Load configuration
+    # Load YAML config
     with open("config.yaml", "r") as file:
         config = yaml.load(file, Loader=SafeLoader)
 
@@ -29,19 +29,19 @@ try:
         config["cookie"]["expiry_days"]
     )
 
-    # Use only valid location parameters
+    # Try positional arguments first (old versions)
     try:
         name, auth_status, username = authenticator.login("Login", "main")
-    except Exception as e:
-        st.error(f"Login error: {e}")
-        st.stop()
+    except TypeError:
+        # Fallback: single argument for older versions
+        name, auth_status, username = authenticator.login("Login")
 
-    # Authentication status control
+    # Authentication result handling
     if auth_status:
         st.success(f"Welcome, {name}!")
         try:
             authenticator.logout("Logout", "sidebar")
-        except Exception:
+        except TypeError:
             authenticator.logout("Logout")
     elif auth_status is False:
         st.error("Incorrect username or password.")
@@ -49,6 +49,6 @@ try:
         st.warning("Please enter your credentials.")
 
 except FileNotFoundError:
-    st.error("Missing config.yaml file in the repository.")
+    st.error("Missing config.yaml file.")
 except Exception as e:
     st.error(f"Unexpected error: {e}")
