@@ -1,0 +1,18 @@
+credentials:
+  usernames:
+    sita_user:
+      email: sita.user@airline.com
+      name: Sita User
+      password: '$2b$12$yJFTwDJrfgrX1SlaZHmS7OqQadRZaoQVPnVCw4UK2W8nRdVV10J6W'
+    tara_user:
+      email: tara.user@airline.com
+      name: Tara User
+      password: '$2b$12$VOL.z5n6DFv8BVxHy1QWWeIMlmBc7GMXzaqOQWUXrsHur4kZMsVxK'
+    summit_user:
+      email: summit.user@airline.com
+      name: Summit User
+      password: '$2b$12$jiBU4/CTS6cADrpUktOhYe7tVrw00UyCPnmw3l6EIfMCknghIVJda'
+cookie:
+  expiry_days: 30
+  key: 'a_random_secret_key_123'
+  name: 'flight_ops_cookie'
