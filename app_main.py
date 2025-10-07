@@ -3,6 +3,9 @@ import streamlit as st
 import yaml
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
+import inspect
+st.write("Authenticate.login signature:", inspect.signature(stauth.Authenticate.login))
+
 
 st.set_page_config(page_title="Login Test", page_icon="✅", layout="centered")
 st.title("Deployment and Login Test - Stable Version")
