@@ -2,53 +2,48 @@
 import streamlit as st
 import yaml
 from yaml.loader import SafeLoader
+import streamlit_authenticator as stauth
+
+st.set_page_config(page_title="Login Test", page_icon="✅", layout="centered")
+st.title("Deployment and Login Test - Stable Version")
+
+# Display version info
+try:
+    version = getattr(stauth, "__version__", "Unknown")
+    st.info(f"streamlit-authenticator version: {version}")
+except Exception:
+    st.info("streamlit-authenticator version: Unknown")
 
 try:
-    import streamlit_authenticator as stauth
-except ModuleNotFoundError:
-    st.error("streamlit-authenticator not installed. Check requirements.txt.")
-    st.stop()
-
-st.set_page_config(page_title="Flight Report Login", page_icon="✈️", layout="centered")
-st.title("Deployment and Login Test - Compatible Version")
-
-# Check authenticator version
-auth_version = getattr(stauth, "__version__", "Unknown")
-st.info(f"streamlit-authenticator version: {auth_version}")
-
-try:
-    # Load YAML config
-    with open("config.yaml", "r") as file:
+    # Load config.yaml
+    with open('config.yaml', 'r') as file:
         config = yaml.load(file, Loader=SafeLoader)
 
-    # Initialize authenticator
+    # Initialize authenticator (for 0.4.2+)
     authenticator = stauth.Authenticate(
-        config["credentials"],
-        config["cookie"]["name"],
-        config["cookie"]["key"],
-        config["cookie"]["expiry_days"]
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days']
     )
 
-    # Try positional arguments first (old versions)
+    # For 0.4.2 use new login structure
     try:
-        name, auth_status, username = authenticator.login("Login", "main")
+        name, authentication_status, username = authenticator.login('Login', location='main')
     except TypeError:
-        # Fallback: single argument for older versions
-        name, auth_status, username = authenticator.login("Login")
+        # fallback for older call signature
+        name, authentication_status, username = authenticator.login('Login')
 
-    # Authentication result handling
-    if auth_status:
+    # Auth logic
+    if authentication_status:
         st.success(f"Welcome, {name}!")
-        try:
-            authenticator.logout("Logout", "sidebar")
-        except TypeError:
-            authenticator.logout("Logout")
-    elif auth_status is False:
-        st.error("Incorrect username or password.")
-    elif auth_status is None:
-        st.warning("Please enter your credentials.")
+        authenticator.logout('Logout', location='sidebar')
+    elif authentication_status is False:
+        st.error("Username or password is incorrect.")
+    elif authentication_status is None:
+        st.warning("Please enter your username and password.")
 
 except FileNotFoundError:
-    st.error("Missing config.yaml file.")
+    st.error("The file 'config.yaml' was not found in your repository.")
 except Exception as e:
     st.error(f"Unexpected error: {e}")
