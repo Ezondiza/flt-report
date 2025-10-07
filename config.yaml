@@ -8,10 +8,6 @@ credentials:
       email: tara.user@airline.com
       name: Tara User
       password: '$2b$12$VOL.z5n6DFv8BVxHy1QWWeIMlmBc7GMXzaqOQWUXrsHur4kZMsVxK'
-    summit_user:
-      email: summit.user@airline.com
-      name: Summit User
-      password: '$2b$12$jiBU4/CTS6cADrpUktOhYe7tVrw00UyCPnmw3l6EIfMCknghIVJda'
 cookie:
   expiry_days: 30
   key: 'a_random_secret_key_123'
